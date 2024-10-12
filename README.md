@@ -1,23 +1,13 @@
- <img src="https://github.com/sobajiro2/DIY-DRONE/blob/main/4.jpg">
-
-I aim to make a simple drone using ESP32
-
-I often see articles about making drones using ESP32 and ARDUINO, etc.
-
-I thought it might be possible to do it with just ESP32, so I tried making it.
-
-current situation
-
-Extract the stick signal from a junk radio with no technical qualifications in japan and input it to the radio's ESP.
-
-Remove the flight controller of QUATTROX-EYE (same as SYMA X5C)
-
-Install a flight controller configured with ESP32
-
-I created and wrote a sketch with arduino IDE
-
-I use M5STACK-A105 ESP32DOWNLOADER to write the program.
-
+ <img src="https://github.com/sobajiro2/DIY-DRONE/blob/main/4.jpg"><br/>
+I aim to make a simple drone using ESP32<br/>
+I often see articles about making drones using ESP32 and ARDUINO, etc.<br/>
+I thought it might be possible to do it with just ESP32, so I tried making it.<br/>
+current situation<br/>
+Extract the stick signal from a junk radio with no technical qualifications in japan and input it to the radio's ESP.<br/>
+Remove the flight controller of QUATTROX-EYE (same as SYMA X5C)<br/>
+Install a flight controller configured with ESP32<br/>
+I created and wrote a sketch with arduino IDE<br/>
+I use M5STACK-A105 ESP32DOWNLOADER to write the program.<br/>
 It flies somehow in rate mode, but it feels like it's being pushed back after operation, which is a future issue.
 
 Level mode is still under development. Adjustments are being made
