@@ -40,24 +40,24 @@ int p;
 void setup() {
 Serial.begin(115200);
 SerialBT.begin("ESPTX");
-      //SPIFFS.format(); // フラッシュメモリ 初回フォーマット時のみ有効にする（次回書き込みからは無効にする）
-  fst = B10000;
+      //SPIFFS.format();
+      // フラッシュメモリ 初回フォーマット時のみ有効にする（次回書き込みからは無効にする）Flash memory Enable only when formatting for the first time (disable from next writing)
   if(!SPIFFS.begin()){
-    fst |= B100; //"SPIFFS initialization failed!");  // エラー表示
+    fst |= B100; //"SPIFFS initialization failed!");  // エラー error
   }
-// フラッシュメモリ読み出し
-  String file_name = "/cal.txt";  // ファイル名の指定
-  if (SPIFFS.exists(file_name)) {  // ファイルが存在すれば
-    File file = SPIFFS.open(file_name, "r"); // ファイルオープン
+// フラッシュメモリ読み出し Flash memory read
+  String file_name = "/cal.txt";  // ファイル名の指定 Specifying the file name
+  if (SPIFFS.exists(file_name)) {  // ファイルが存在すれば if the file exists
+    File file = SPIFFS.open(file_name, "r"); // ファイルオープン file open
     if(!file){  // ファイルが開けなければ
-        fst |= B10; // Failed to open file"); // エラー表示
+        fst |= B10; // Failed to open file"); // エラー error
       return;
     } else {    // ファイルが開ければ
-        fst |= B1000; // Open file to read");   // 読み取り実行表示
+        fst |= B1000; // Open file to read");   // 読み取り実行表示 Read execution display
     }
     int i = 0;
-    while(file.available()){      // ファイルの内容を読み取り表示  // ファイルのデータ分繰り返す
-      bdat[i] = file.read(); // ファイルから1バイトずつデータを読み取り
+    while(file.available()){
+      bdat[i] = file.read(); // ファイルから1バイトずつデータを読み取り Read data one byte at a time from the file
       i++;
       if(i > 11)break;
     } 
@@ -67,10 +67,9 @@ SerialBT.begin("ESPTX");
   calmotx = *((int32_t*)( (int)&bdat)+0);
   calmoty = *((int32_t*)( (int)&bdat)+1);
   calmotz = *((int32_t*)( (int)&bdat)+2);
-      // ファイルを閉じる
       file.close(); 
-    } else {  // ファイルが存在しなければ
-        fst |= B1; // File does not exist");  // エラー表示
+    } else {  // ファイルが存在しなければ if the file does not exist
+        fst |= B1; // File does not exist");  // エラー error
     }
  
 
@@ -137,10 +136,10 @@ char htryp;
 char rxsum;
 int lms;
 long lastus;
-int rxrrl = 0; //前回のロール
-int rxppl = 0;  //前回のピッチ
-int rxpdif; //ピッチ絶対値変化　操作後の戻り防止
-int rxrdif; //ロール絶対値変化　操作後の戻り防止
+int rxrrl = 0; //前回のロール previous roll
+int rxppl = 0;  //前回のピッチ previous pitch
+int rxpdif; //ピッチ絶対値変化　操作後の戻り防止 Pitch absolute value change Prevention of return after operation
+int rxrdif; //ロール絶対値変化　操作後の戻り防止 Roll absolute value change Prevention of return after operation
 int rxpd3;
 int rxpd2;
 int rxpd1;
@@ -148,13 +147,14 @@ int rxrd3;
 int rxrd2;
 int rxrd1;
 
-// 各係数　割り算なので普通と逆　小さいほうがよく効くEach coefficient.Since it is a division, it is the opposite of a failure.The smaller the value, the better the effect.
+// 各係数　割り算なので普通と逆　kd 以外小さいほうがよく効く
+// Since each coefficient is a division, it works better if it is smaller, except for normal and inverse kd.
 int avgn = 32;  // moving average 2,4,8,16,32
 int gyrat = 60; //ジャイロ効き具合係数 Gyro effectiveness coefficient
 int rprat = 100; // ロールピッチ効き具合係数 roll pitch effectiveness coefficient
 int yrat = 8; //ヨー効き具合係数 yaw effectiveness coefficient
 int16_t kd = 6; //PID　の　D係数 D coefficient of PID
-int arat = 20;  // acc coefficient
+int arat = 20;  // acc coefficient Number of right shifts
 int akd = 2;  // acc D coefficient of PID
 int rparat = 40;  // ロールピッチ効き具合係数 roll pitch effectiveness coefficient
 int realm = 0; // realtime monitor 0 no  1 yes
@@ -199,22 +199,22 @@ if(lratemode != ratemode){
     gyrat = 8;  // ジャイロ効き具合係数 Gyro effectiveness coefficient
     rprat = 10;  // ロールピッチ効き具合係数 roll pitch effectiveness coefficient
     yrat = 3;  // ヨー効き具合係数 yaw effectiveness coefficient
-    kd = 6;   // PID　の　D係数 D coefficient of PID
-    arat = 16;
-    akd = 0;
-    rparat = 250;
+    kd = 3;   // PID　の　D係数 D coefficient of PID
+    arat = 16; // acc coefficient Number of right shifts
+    akd = 0;  // acc D coefficient of PID
+    rparat = 250; // ロールピッチ効き具合係数 roll pitch effectiveness coefficient
     writeMPU6050(MPU6050_CONFIG, 0x00);
   }else{
     //-------------levelmode-----------------
-    avgn = 32;
+    avgn = 2;
     gyrat = 70; //ジャイロ効き具合係数 Gyro effectiveness coefficient
     rprat = 200; // ロールピッチ効き具合係数 roll pitch effectiveness coefficient
     yrat = 8; //ヨー効き具合係数 yaw effectiveness coefficient
     kd = 0; //PID　の　D係数 D coefficient of PID
-    arat = 14;
-    akd = 2;
-    rparat = 40;
-    writeMPU6050(MPU6050_CONFIG, 0x06);
+    arat = 14; // acc coefficient Number of right shifts
+    akd = 2;  // acc D coefficient of PID
+    rparat = 60; // ロールピッチ効き具合係数 roll pitch effectiveness coefficient
+    writeMPU6050(MPU6050_CONFIG, 0x03);
   }
 }
 lratemode = ratemode;
@@ -307,12 +307,12 @@ if(strpcentf == 1 && rxt < 3 && rxy < -123 && rxr > -3 && rxr < 3){
 if(stcentf == 1 && rxt < 3 && rxp > 123 && rxr > 123){
   if(rxy < -123){
   stcentf = 0;
-  calmotz += 1;
+  calmotz -= 1;
   caflg = 1000;
   }
   if(rxy > 123){
   stcentf = 0;
-  calmotz -= 1;
+  calmotz += 1;
   caflg = 1000;
   }
 }
@@ -324,23 +324,23 @@ if(caflg == 1){
   SerialBT.print(calmoty);
   SerialBT.print("\t");
   SerialBT.println(calmotz);
-//　フラッシュメモリへ書き込み
+//　フラッシュメモリへ書き込み Write to flash memory
   int wdat[12];
   wdat[0] = calmotx;
   wdat[1] = calmoty;
   wdat[2] = calmotz;
-        File file = SPIFFS.open("/cal.txt", "w"); // ファイルを作成して開く
-  if(!file){  // ファイルが開けなければ
-    SerialBT.println("Failed to create file"); // エラー表示
+        File file = SPIFFS.open("/cal.txt", "w"); // ファイルを作成して開く create and open file
+  if(!file){
+    SerialBT.println("Failed to create file");
     return;
-  } else {    // ファイルが開ければ
-    SerialBT.println("Create file"); // ファイル作成実行表示
+  } else {
+    SerialBT.println("Create file"); 
   }
-   // ファイルにデータを書き込む
+   // ファイルにデータを書き込む write data to file
   for(int i = 0;i < 12;i++){
-  file.print((char)*((int32_t*)( (int)&wdat+i)));             // moto byte chr nisitemita文字列書き込み実行
+  file.print((char)*((int32_t*)( (int)&wdat+i)));             // 文字列書き込み実行 String writing execution
   }
-  file.close(); // ファイルを閉じる
+  file.close();
     pwait = 800;
 }
 if(rxr > -3 && rxr < 3 && rxp > -3 && rxp < 3 )strpcentf = 1; // Once the stick is centered, accept the next instruction.
@@ -380,6 +380,10 @@ if(rxy > -3 && rxy < 3)stcentf = 1; // Once the stick is centered, accept the ne
     realm = rxcom2;
     ratchflg = 1;
     }
+    if(rxcom11 == 9){
+      if(rxcom2 == 2 || rxcom2 == 4 || rxcom2 == 8 || rxcom2 == 16 || rxcom2 == 32)avgn = rxcom2;
+    ratchflg = 1;
+    }
   if(ratchflg == 1){
     ratchflg = 0;
     SerialBT.print("\t1gyrat:");
@@ -398,7 +402,8 @@ if(rxy > -3 && rxy < 3)stcentf = 1; // Once the stick is centered, accept the ne
     SerialBT.print(rparat);
     SerialBT.print("\t8realm:");
     SerialBT.print(realm);
-    SerialBT.print("\ta caax:");
+    SerialBT.print("\t9 avgn:");
+    SerialBT.print(avgn);
     pwait = 800;
 
   }
@@ -448,7 +453,7 @@ if(micros() - lms > 100000){
   acc_y = acc_y / avgn - cay;
   gyrox = gyrox / avgn - cgyrox;
   gyroy = gyroy / avgn - cgyroy;  // - cagtroy 241008kesita
-  gyroz = gyroz / avgn - cgyroz - calmotz;
+  gyroz = gyroz / avgn - cgyroz;
 
 if(gyrat == 0)gyrat = 1;
 if(rprat == 0)rprat = 1;
@@ -488,10 +493,10 @@ rxrd3 = rxrd2;
 rxrd2 = rxrd1;
 rxrd1 = rxrdif;
 
-fl = tt - adifx + adifxd * akd -calmotx- gdifx + gdifxd * kd - adify + adifyd * akd +calmoty+ gdify - gdifyd * kd - gdifz - gdifzd * 10;
-fr = tt + adifx - adifxd * akd +calmotx+ gdifx - gdifxd * kd - adify + adifyd * akd +calmoty+ gdify - gdifyd * kd + gdifz + gdifzd * 10;
-rl = tt - adifx + adifxd * akd -calmotx- gdifx + gdifxd * kd + adify - adifyd * akd -calmoty- gdify + gdifyd * kd + gdifz + gdifzd * 10;
-rr = tt + adifx - adifxd * akd +calmotx+ gdifx - gdifxd * kd + adify - adifyd * akd -calmoty- gdify + gdifyd * kd - gdifz - gdifzd * 10;
+fl = tt - adifx + adifxd * akd -calmotx- gdifx + gdifxd * kd - adify + adifyd * akd +calmoty+ gdify - gdifyd * kd - gdifz - gdifzd * 10 - calmotz;
+fr = tt + adifx - adifxd * akd +calmotx+ gdifx - gdifxd * kd - adify + adifyd * akd +calmoty+ gdify - gdifyd * kd + gdifz + gdifzd * 10 + calmotz;
+rl = tt - adifx + adifxd * akd -calmotx- gdifx + gdifxd * kd + adify - adifyd * akd -calmoty- gdify + gdifyd * kd + gdifz + gdifzd * 10 + calmotz;
+rr = tt + adifx - adifxd * akd +calmotx+ gdifx - gdifxd * kd + adify - adifyd * akd -calmoty- gdify + gdifyd * kd - gdifz - gdifzd * 10 - calmotz;
 if(fl<0||tt<1)fl=0;
 if(fr<0||tt<1)fr=0;
 if(rl<0||tt<1)rl=0;
@@ -551,12 +556,8 @@ SerialBT.print(adifyd);
 SerialBT.print("\t");
 SerialBT.print(gdify);
 pwait = 1;
-
 }
-
-
 if(pwait > 0)pwait--;
-
 while(micros() < (lastus + 2000));
 lastus = micros();
 }
@@ -595,90 +596,3 @@ sumgz += z;
   cgyroz = sumgz / 1000;
   stoutc = 0;
 }
-/* 実行速度計算
-SerialBT.print("\t");
-SerialBT.println(micros() - lus);
-lus = micros();
-*/
-/* loop　の先頭にあったが未使用　シリアル通信デバッグ用
-char inbuf[10];
-int ibc = 0;
-int ival;      // 受信用 for receiving
-if (Serial.available()) {
-  inbuf[ibc] = Serial.read();
-  ibc++;
-  if(inbuf[ibc-1] < '0' || inbuf[ibc-1] > '9'){
-  ibc = 0;
-}
-// 文字列の長さが2文字以上の場合
-if (ibc > 2) {
-    ibc = 0;
-    ival = (inbuf[0] & 15) * 100 + (inbuf[1] & 15) * 10 + (inbuf[2] & 15);
-    p = ival / 100;
-    
-    Serial.println(ival);
-    if(p == 0)fr=ival%100;
-    if(p == 1)fl=ival%100;
-    if(p == 2)rr=ival%100;
-    if(p == 3)rl=ival%100;
-    Serial.print(fr);
-    Serial.print(" ");
-    Serial.print(fl);
-    Serial.print(" "); 
-    Serial.print(rr);
-    Serial.print(" "); 
-    Serial.print(rl);
-    Serial.println(" ");
-
-    ledcWrite(25,fr);
-    ledcWrite(32,fl);
-    ledcWrite(27,rr);
-    ledcWrite(12,rl);
-    }
-
-    fl=0; 
-    fr=0;
-    rl=0;
-    rr=0;
-}
-
-
-
-
-if(rxcom11 == 4){
-    if(rxcom2 != 255)  cgyrox = rxcom2 << 8;
-    SerialBT.print("\tcgyrox:");
-    SerialBT.println(cgyrox);
-  pwait = 300;
-        }
-  if(rxcom11 == 5){
-    if(rxcom2 != 255)  cgyroy = rxcom2 << 8;
-    SerialBT.print("\tcgyroy:");
-    SerialBT.println(cgyroy);
-  pwait = 300;
-        }
-  if(rxcom11 == 6){
-    if(rxcom2 != 255)  cgyroz = rxcom2 << 8;
-    SerialBT.print("\tcgyroz:");
-    SerialBT.println(cgyroz);
-  pwait = 300;
-        }
-  if(rxcom11 == 7){
-    if(rxcom2 != 255)  cgyrox = -(rxcom2 << 8);
-    SerialBT.print("\tcgyrox:");
-    SerialBT.println(cgyrox);
-  pwait = 300;
-        }
-  if(rxcom11 == 8){
-    if(rxcom2 != 255)  cgyroy = -(rxcom2 << 8);
-    SerialBT.print("\tcgyroy:");
-    SerialBT.println(cgyroy);
-  pwait = 300;
-        }
-  if(rxcom11 == 9){
-    if(rxcom2 != 255)  cgyroz = -(rxcom2 << 8);
-    SerialBT.print("\tcgyroz:");
-    SerialBT.println(cgyroz);
-  pwait = 300;
-        }
-*/
