@@ -13,12 +13,12 @@ Level mode is still under development. Adjustments are being made<br/>
 Eventually, I would like to make adjustments and program changes to make it more stable and build my own aircraft.<br/>
 Main usage<br/>
 Stick left lower left Stick right lower right radio reset (=bind)<br/>
-<img src="https://github.com/sobajiro2/DIY-DRONE/blob/main/7.jpg"><br/>
+<img src="https://github.com/sobajiro2/DIY-DRONE/blob/main/7.png"><br/>
 Stick left fixed at bottom left Stick right move up and down to trim pitch<br/>
 Stick left fixed at lower left Stick right move left and right to roll trim<br/>
 Stick right fixed at upper right Stick left move left and right to adjust the yaw rim<br/>
 Stick left lower right Stick right lower left Calibration and rate/level switching<br/>
-<img src="https://github.com/sobajiro2/DIY-DRONE/blob/main/6.jpg"><br/>
+<img src="https://github.com/sobajiro2/DIY-DRONE/blob/main/6.png"><br/>
 Settings and status can be displayed using the serial port of the ESP for the radio.<br/>
 others<br/>
 I am using the M5STACK-A105 ESP32DOWNLOADER for the ESP for the radio because the serial interface of the development board was broken, but normally I think there is no problem with the serial interface of the development board.<br/>
