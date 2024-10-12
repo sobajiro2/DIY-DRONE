@@ -1,3 +1,5 @@
+ <img src="https://github.com/sobajiro2/DIY-DRONE/blob/main/4.jpg">
+
 I aim to make a simple drone using ESP32
 
 I often see articles about making drones using ESP32 and ARDUINO, etc.
@@ -6,7 +8,7 @@ I thought it might be possible to do it with just ESP32, so I tried making it.
 
 current situation
 
-Extract the stick signal from a junk radio with no technical qualifications and input it to the radio's ESP.
+Extract the stick signal from a junk radio with no technical qualifications in japan and input it to the radio's ESP.
 
 Remove the flight controller of QUATTROX-EYE (same as SYMA X5C)
 
